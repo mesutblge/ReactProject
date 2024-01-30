@@ -1,0 +1,10 @@
+.main{
+    width: 800px;
+    text-align: left;
+    margin:20px;
+}
+.link{
+    text-decoration: none;
+    box-shadow: none;
+    color: white;
+}

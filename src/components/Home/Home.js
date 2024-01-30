@@ -1,5 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
+import React from 'react';
 import Post from '../Post/Post';
+import { Container } from '@mui/material';
+import './Home.css';
 
 function Home() {
   const [error, setError] = useState(null);
@@ -28,9 +31,13 @@ function Home() {
   } else {
     return (
       <div className="container">
-        Home
         {postList.map((post) => (
-          <Post title={post.title} text={post.text}></Post>
+          <Post
+            userId={post.userId}
+            title={post.title}
+            text={post.text}
+            userName={post.userName}
+          ></Post>
         ))}
       </div>
     );

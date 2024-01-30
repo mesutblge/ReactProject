@@ -22,7 +22,7 @@ const ExpandMore = styled((props) => {
     duration: theme.transitions.duration.shortest,
   }),
 }));
-function Post(props) {
+function PostForm(props) {
   const [expanded, setExpanded] = useState(false);
   const [liked, setLiked] = useState(false);
 
@@ -72,4 +72,4 @@ function Post(props) {
   );
 }
 
-export default Post;
+export default PostForm;
