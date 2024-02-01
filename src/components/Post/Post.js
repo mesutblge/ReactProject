@@ -7,10 +7,9 @@ import Collapse from '@mui/material/Collapse';
 import Avatar from '@mui/material/Avatar';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
-import { red } from '@mui/material/colors';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import CommentIcon from '@mui/icons-material/Comment';
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import './Post.css';
 import { Link } from 'react-router-dom';
 const ExpandMore = styled((props) => {
@@ -25,21 +24,51 @@ const ExpandMore = styled((props) => {
 function Post(props) {
   const [expanded, setExpanded] = useState(false);
   const [liked, setLiked] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [commentList, setCommentList] = useState([""]);
+  const [error, setError] = useState(null);
+  const isInitialMount =useRef(true);
 
   const handleExpandClick = () => {
     setExpanded(!expanded);
+    refreshComments();
+    console.log(commentList);
   };
-  const { title, text, userId, userName } = props;
+  const { title, text, userId, userName, postId } = props;
   const handleLike = () => {
     setLiked(!liked);
   };
+
+  const refreshComments=()=>{
+    fetch('/comments/getAllComment?postId='+postId)
+      .then((res) => res.json())
+      .then(
+        (result) => {
+          setIsLoaded(true);
+          setCommentList(result);
+        },
+        (error) => {
+          setIsLoaded(true);
+          setError(error);
+        }
+      );
+  }
+  useEffect(()=>{
+
+    if(isInitialMount.current)
+    isInitialMount.current=false;
+  else
+  refreshComments();
+  },[])
+
 
   return (
     <Card className="main">
       <CardHeader
         avatar={
           <Link className="link" to={{ pathname: '/users/' + userId }}>
-            <Avatar sx={{ bgcolor: red[500] }} aria-label="recipe">
+            <Avatar sx={{ background:'linear-gradient(45deg,#2196F3 30%, #21CBF3 90%)',
+              color:'white'}} aria-label="recipe">
               {userName.charAt(0).toUpperCase()}
             </Avatar>
           </Link>

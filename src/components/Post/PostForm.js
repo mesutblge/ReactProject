@@ -2,17 +2,14 @@ import { styled } from '@mui/material/styles';
 import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
 import CardContent from '@mui/material/CardContent';
-import CardActions from '@mui/material/CardActions';
-import Collapse from '@mui/material/Collapse';
 import Avatar from '@mui/material/Avatar';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
-import { red } from '@mui/material/colors';
-import FavoriteIcon from '@mui/icons-material/Favorite';
-import CommentIcon from '@mui/icons-material/Comment';
+import TextField from '@mui/material/TextField';
 import React, { useState } from 'react';
 import './Post.css';
 import { Link } from 'react-router-dom';
+import { Alert, Button, FormControl, InputAdornment, Snackbar } from '@mui/material';
 const ExpandMore = styled((props) => {
   const { expand, ...other } = props;
   return <IconButton {...other} />;
@@ -23,52 +20,115 @@ const ExpandMore = styled((props) => {
   }),
 }));
 function PostForm(props) {
-  const [expanded, setExpanded] = useState(false);
-  const [liked, setLiked] = useState(false);
+  const { userId, userName, refreshPosts } = props;
+  const [text,setText]=useState("");
+  const [title,setTitle]=useState("");
+  const [isSent,setIsSent]=useState(false);
 
-  const handleExpandClick = () => {
-    setExpanded(!expanded);
-  };
-  const { title, text, userId, userName } = props;
-  const handleLike = () => {
-    setLiked(!liked);
-  };
+
+  const savePost=()=>{
+    fetch("/posts/createPost",
+    {
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json",
+      },
+      body:JSON.stringify({
+        title:title,
+        userId:userId,
+        text:text,
+      }),
+    })
+    .then((res)=>res.json())
+    .catch((err)=>console.log(err))
+  }
+
+  const handleSubmit =()=>{
+    savePost();
+    setIsSent(true);
+    refreshPosts();
+    setTitle("");
+    setText("");
+    }
+
+  const handleTitle =(value)=>{
+    setTitle(value);
+    setIsSent(false);
+
+  }
+
+  const handleText =(value)=>{
+    setText(value);
+    setIsSent(false);
+  }
+
+  const handleClose=(event,reason)=>{
+    if(reason==="clickaway"){
+      return;
+    }
+    setIsSent(false);
+  }
 
   return (
+<div>
+  <Snackbar open={isSent} autoHideDuration={1000} onClose={handleClose}>
+    <Alert onClose={handleClose} severity='success'>
+      This is a success message!
+    </Alert>
+  </Snackbar>
+
     <Card className="main">
       <CardHeader
         avatar={
           <Link className="link" to={{ pathname: '/users/' + userId }}>
-            <Avatar sx={{ bgcolor: red[500] }} aria-label="recipe">
+            <Avatar sx={{background:'linear-gradient(45deg,#2196F3 30%, #21CBF3 90%)',
+              color:'white' }} aria-label="recipe">
               {userName.charAt(0).toUpperCase()}
             </Avatar>
           </Link>
         }
-        title={title}
+        title={<TextField
+        id="outlined-adornment-amount"
+        multiline
+        placeholder="Title"
+        inputProps={{maxLength : 25}}
+        fullWidth
+        value={title}
+        onChange={(i)=>handleTitle(i.target.value)}
+        >
+        
+        </TextField>}
       />
       <CardContent>
         <Typography variant="body1" color="text.secondary">
-          {text}
+        <TextField
+          id="outlined-adornment-amount"
+          multiline
+          placeholder="Text"
+          fullWidth
+          value={text}
+          onChange={(i)=>handleText(i.target.value)}
+          inputProps={{ maxLength: 250 }}
+          InputProps={{
+          endAdornment: ( 
+            <InputAdornment position="end">
+              <Button 
+               style={{background:'linear-gradient(45deg,#2196F3 30%, #21CBF3 90%)',
+              color:'white'}}
+               variant="contained" 
+               onClick={handleSubmit}
+
+               >
+                Post
+              </Button>
+            </InputAdornment>
+        ),
+      }}
+    />
         </Typography>
       </CardContent>
-      <CardActions disableSpacing>
-        <IconButton aria-label="add to favorites" onClick={handleLike}>
-          <FavoriteIcon style={liked ? { color: 'red' } : null} />
-        </IconButton>
-
-        <ExpandMore
-          expand={expanded}
-          onClick={handleExpandClick}
-          aria-expanded={expanded}
-          aria-label="show more"
-        >
-          <CommentIcon />
-        </ExpandMore>
-      </CardActions>
-      <Collapse in={expanded} timeout="auto" unmountOnExit>
-        <CardContent></CardContent>
-      </Collapse>
     </Card>
+</div>
   );
 }
 
